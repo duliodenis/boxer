@@ -37,13 +37,36 @@ var topCountdownTimer = 5
 var touchedNode = SKNode?()
 
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
+    
     override func didMoveToView(view: SKView) {
- 
+        backgroundColor = offBlack
+        
+        physicsBody = SKPhysicsBody(edgeLoopFromRect: frame)
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        for touch in touches {
+            let touchLocation = touch.locationInNode(self)
+        }
 
+    }
+    
+    func spawnFloor() {
+        // Create a floor sprite node
+        floor = SKSpriteNode(color: offWhite, size: CGSize(width: self.frame.width, height: 250.0))
+        // With a position
+        floor?.position = CGPoint(x: CGRectGetMidX(frame), y: CGRectGetMinY(frame))
+        // and a physics body for collisions
+        floor?.physicsBody = SKPhysicsBody(rectangleOfSize: floor!.size)
+        // that itself isn't affected by gravity
+        floor?.physicsBody?.affectedByGravity = false
+        // but that can be moved
+        floor?.physicsBody?.dynamic = true
+        // give it a name
+        floor?.name = "floorName"
+        // add it to the game scene
+        addChild(floor!)
     }
    
     override func update(currentTime: CFTimeInterval) {
