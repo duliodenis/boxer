@@ -47,7 +47,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         for touch in touches {
-            let touchLocation = touch.locationInNode(self)
+            touchLocation = touch.locationInNode(self)
+            
+            if isSpawning {
+                spawnBox()
+            }
         }
 
     }
@@ -67,6 +71,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         floor?.name = "floorName"
         // add it to the game scene
         addChild(floor!)
+    }
+    
+    func spawnBox() {
+        // make some random colors and add the base
+        let redTemp = (CGFloat(arc4random_uniform(255)) + baseColor) / 255
+        let greenTemp = (CGFloat(arc4random_uniform(255)) + baseColor) / 255
+        let blueTemp = (CGFloat(arc4random_uniform(255)) + baseColor) / 255
+        // to make a random color
+        let tempColor = UIColor(red: redTemp, green: greenTemp, blue: blueTemp, alpha: 1.0)
+        // to make a new box
+        box = SKSpriteNode(color: tempColor, size: boxSize)
+        box?.position.x = (touchLocation?.x)!
+        box?.position.y = (touchLocation?.y)!
+        
+        box?.physicsBody = SKPhysicsBody(rectangleOfSize: box!.size)
+        box?.physicsBody?.affectedByGravity = true
+        // up the score by 1
+        score += 1
+        // and add to the game scene
+        addChild(box!)
+    }
+    
+    func updateScore() {
+        scoreLabel?.text = "Score: \(score)"
     }
    
     override func update(currentTime: CFTimeInterval) {
