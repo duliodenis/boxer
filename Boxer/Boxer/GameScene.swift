@@ -12,7 +12,7 @@ import SpriteKit
 
 var box = SKSpriteNode?()
 var floor = SKSpriteNode?()
-var boxSize = CGSize(width: 130, height: 130)
+var boxSize = CGSize(width: 60, height: 60)
 
 var mainLabel = SKLabelNode?()
 var scoreLabel = SKLabelNode?()
@@ -43,6 +43,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         backgroundColor = offBlack
         
         physicsBody = SKPhysicsBody(edgeLoopFromRect: frame)
+        physicsWorld.contactDelegate = self
+        
+        spawnFloor()
+        spawnMainLabel()
+        spawnScore()
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -53,18 +58,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 spawnBox()
             }
         }
-
     }
     
     func spawnFloor() {
         // Create a floor sprite node
-        floor = SKSpriteNode(color: offWhite, size: CGSize(width: self.frame.width, height: 250.0))
+        floor = SKSpriteNode(color: offWhite, size: CGSize(width: self.frame.width, height: 100.0))
         // With a position
-        floor?.position = CGPoint(x: CGRectGetMidX(frame), y: CGRectGetMinY(frame))
+        floor?.position = CGPoint(x: CGRectGetMidX(frame), y: CGRectGetMinY(frame) + 30)
         // and a physics body for collisions
         floor?.physicsBody = SKPhysicsBody(rectangleOfSize: floor!.size)
         // that itself isn't affected by gravity
         floor?.physicsBody?.affectedByGravity = false
+        // not affected by angular force
+        floor?.physicsBody?.allowsRotation = false
         // but that can be moved
         floor?.physicsBody?.dynamic = true
         // give it a name
@@ -75,9 +81,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func spawnBox() {
         // make some random colors and add the base
-        let redTemp = (CGFloat(arc4random_uniform(255)) + baseColor) / 255
-        let greenTemp = (CGFloat(arc4random_uniform(255)) + baseColor) / 255
-        let blueTemp = (CGFloat(arc4random_uniform(255)) + baseColor) / 255
+        let redTemp = (CGFloat(arc4random_uniform(255)) / 255) + baseColor
+        let greenTemp = (CGFloat(arc4random_uniform(255)) / 255) + baseColor
+        let blueTemp = (CGFloat(arc4random_uniform(255)) / 255) + baseColor
         // to make a random color
         let tempColor = UIColor(red: redTemp, green: greenTemp, blue: blueTemp, alpha: 1.0)
         // to make a new box
@@ -87,10 +93,29 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         box?.physicsBody = SKPhysicsBody(rectangleOfSize: box!.size)
         box?.physicsBody?.affectedByGravity = true
-        // up the score by 1
+        // up the score by 1 and update
         score += 1
+        updateScore()
         // and add to the game scene
         addChild(box!)
+    }
+    
+    func spawnMainLabel() {
+        mainLabel = SKLabelNode(fontNamed: "Good Times")
+        mainLabel?.fontSize = 80
+        mainLabel?.fontColor = offWhite
+        mainLabel?.position = CGPoint(x: CGRectGetMidX(frame), y: CGRectGetMidY(frame) + 100)
+        mainLabel?.text = "START"
+        addChild(mainLabel!)
+    }
+    
+    func spawnScore() {
+        scoreLabel = SKLabelNode(fontNamed: "Good Times")
+        scoreLabel?.fontSize = 50
+        scoreLabel?.fontColor = offBlack
+        scoreLabel?.position = CGPoint(x: CGRectGetMidX(frame), y: 30)
+        scoreLabel?.text = "Score: \(score)"
+        addChild(scoreLabel!)
     }
     
     func updateScore() {
