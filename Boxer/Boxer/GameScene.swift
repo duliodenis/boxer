@@ -31,7 +31,7 @@ var offBlack = SKColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
 var touchLocation = CGPoint?()
 var score = 0
 
-var countdownTimer = 6
+var countdownTimerVar = 6
 var topCountdownTimer = 5
 
 var touchedNode = SKNode?()
@@ -48,6 +48,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         spawnFloor()
         spawnMainLabel()
         spawnScore()
+        countdownTimer()
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -120,6 +121,43 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func updateScore() {
         scoreLabel?.text = "Score: \(score)"
+    }
+    
+    func countdownTimer() {
+        let wait = SKAction.waitForDuration(1.0)
+        let countdown = SKAction.runBlock {
+            countdownTimerVar -= 1
+            
+            if countdownTimerVar <= 0 {
+                countdownTimerVar = topCountdownTimer
+                
+                if isSpawning && !isCollecting {
+                    isSpawning = false
+                    isCollecting = true
+                }
+                
+                if !isSpawning && isCollecting && logicVar {
+                    isSpawning = false
+                    isCollecting = false
+                    canComplete = true
+                    
+                    self.waitThenRestartGame()
+                }
+                
+                logicVar = true
+            }
+            
+            if !canComplete {
+                mainLabel?.text = "\(countdownTimerVar)"
+            }
+        }
+        
+        let sequence = SKAction.sequence([wait, countdown])
+        runAction(SKAction.repeatActionForever(sequence))
+    }
+    
+    func waitThenRestartGame() {
+        
     }
    
     override func update(currentTime: CFTimeInterval) {
