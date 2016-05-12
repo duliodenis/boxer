@@ -1,7 +1,7 @@
 # Boxer
 An iOS 9 / Swift 2 SpriteKit game with boxes. Stack and collect as many boxes as you can before time runs out.
 
-![](art/screenshot/boxer01.gif?raw=true)
+![](art/screenshot/boxer02.gif?raw=true)
 
 ## Contributing
 

@@ -36,6 +36,8 @@ var topCountdownTimer = 5
 
 var touchedNode = SKNode?()
 
+var mainLabelPositionStart = CGPoint?()
+var mainLabelPositionCountdown = CGPoint?()
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
@@ -44,6 +46,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         physicsBody = SKPhysicsBody(edgeLoopFromRect: frame)
         physicsWorld.contactDelegate = self
+        
+        mainLabelPositionStart = CGPoint(x: CGRectGetMidX(frame), y: CGRectGetMidY(frame) + 100)
+        mainLabelPositionCountdown = CGPointMake(CGRectGetMidX(frame), CGRectGetMidY(frame) + 125)
         
         spawnFloor()
         spawnMainLabel()
@@ -55,8 +60,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for touch in touches {
             touchLocation = touch.locationInNode(self)
             
+            touchedNode = nodeAtPoint(touchLocation!)
+            
             if isSpawning {
                 spawnBox()
+            }
+            
+            if isCollecting {
+                collectBoxes()
             }
         }
     }
@@ -105,7 +116,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         mainLabel = SKLabelNode(fontNamed: "Good Times")
         mainLabel?.fontSize = 80
         mainLabel?.fontColor = offWhite
-        mainLabel?.position = CGPoint(x: CGRectGetMidX(frame), y: CGRectGetMidY(frame) + 100)
+        mainLabel?.position = mainLabelPositionStart!
         mainLabel?.text = "START"
         addChild(mainLabel!)
     }
@@ -123,12 +134,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         scoreLabel?.text = "Score: \(score)"
     }
     
+    func collectBoxes() {
+        touchedNode!.removeFromParent()
+        
+        score += 1
+        updateScore()
+    }
+    
     func countdownTimer() {
         let wait = SKAction.waitForDuration(1.0)
         let countdown = SKAction.runBlock {
             countdownTimerVar -= 1
             
-            if countdownTimerVar <= 0 {
+            self.mainLabelTimerUX()
+            
+            if countdownTimerVar < 0 {
                 countdownTimerVar = topCountdownTimer
                 
                 if isSpawning && !isCollecting {
@@ -141,7 +161,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     isCollecting = false
                     canComplete = true
                     
-                    self.waitThenRestartGame()
+                    self.gameOver()
                 }
                 
                 logicVar = true
@@ -156,8 +176,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         runAction(SKAction.repeatActionForever(sequence))
     }
     
-    func waitThenRestartGame() {
+    func mainLabelTimerUX() {
+        mainLabel?.fontSize = 250
+        mainLabel?.position = mainLabelPositionCountdown!
+    }
+    
+    func gameOver() {
+        mainLabel?.fontSize = 40
+        mainLabel?.position = mainLabelPositionStart!
+        mainLabel?.text = "Game Over"
         
+        waitMoveToTitleScreen()
+    }
+    
+    func waitMoveToTitleScreen() {
+        let wait = SKAction.waitForDuration(3.0)
+        let changeScene = SKAction.runBlock {
+            self.view?.presentScene(TitleScene(), transition: SKTransition.doorwayWithDuration(0.4))
+        }
+        let sequence = SKAction.sequence([wait, changeScene])
+        runAction(SKAction.repeatAction(sequence, count: 1))
     }
    
     override func update(currentTime: CFTimeInterval) {
